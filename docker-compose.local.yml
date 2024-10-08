@@ -19,7 +19,6 @@ services:
       - /var/www/html/vendor/
       - .:/var/www/html
 
-  # MYSQL    
   db:
     platform: linux/x86_64
     image: mysql:8.0
@@ -28,13 +27,13 @@ services:
     environment:
       MYSQL_ROOT: "root"
       MYSQL_ROOT_PASSWORD: "1582"
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME:-username}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_DATABASE: ${DB_DATABASE:-APP}
     volumes:
       - db:/var/lib/mysql
     ports:
-      - 3306:3306
+      - ${DB_PORT:-3306}
     #Let docker decide by just providing the key
 volumes:
   db:
