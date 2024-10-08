@@ -1,0 +1,41 @@
+services:
+  # nginx
+  web:
+    container_name: NGINX
+    build:
+      dockerfile: ./nginx/Dockerfile
+    ports:
+      - "80:80" #local:container
+    volumes:
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+
+  #PHP
+  #Build our own image we pass the build key
+  app:
+    container_name: WEBAPP
+    build:
+      dockerfile: Dockerfile.local
+    volumes:
+      - /var/www/html/vendor/
+      - .:/var/www/html
+
+  # MYSQL    
+  db:
+    platform: linux/x86_64
+    image: mysql:8.0
+    container_name: Database
+    env_file: ".env"
+    environment:
+      MYSQL_ROOT: "root"
+      MYSQL_ROOT_PASSWORD: "1582"
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - 3306:3306
+    #Let docker decide by just providing the key
+volumes:
+  db:
+    driver: local

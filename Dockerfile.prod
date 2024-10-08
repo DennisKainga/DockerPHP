@@ -1,0 +1,39 @@
+FROM php:8.3-fpm-alpine
+
+# Create the user with the provided UID
+# RUN adduser -D -u $uid -G www-data $user
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql 
+
+# Allow superuser for Composer
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+# Obtain Composer using a multi-step build
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory (optional, if needed)
+WORKDIR /var/www/html
+
+# Copy Composer files and install dependencies
+COPY ./composer.* ./
+RUN composer install --prefer-dist --no-dev --no-scripts --no-progress --no-interaction
+
+# Copy the rest of the application code
+COPY . .
+
+# Optimize Composer autoloading
+RUN composer dump-autoload --optimize
+
+# Create a group with the given GID (1000) for Laravel
+RUN addgroup -g 1000 laravel
+
+# Create a user "laravel" and assign it to the "laravel" group with no password and set the shell
+RUN adduser -D -G laravel -s /bin/sh laravel
+
+# Switch to the laravel user
+USER laravel
+
+
+# Start PHP-FPM
+CMD ["php-fpm"]
